@@ -1,6 +1,9 @@
 # Link: https://leetcode.com/problems/students-and-examinations/
 
-# Write your MySQL query statement below
+# A CROSS JOIN produces a Cartesian product of two tables. It takes every single row from Table A and pairs it with every single row from Table B
+# The total number of rows will be the product of all three row counts:Total Rows = (Table A Rows) × (Table B Rows) × (Table C Rows)
+
+# Important Conceptual Question for Interview
 
 SELECT 
 a.student_id, 
