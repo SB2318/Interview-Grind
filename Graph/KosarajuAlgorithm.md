@@ -1,5 +1,12 @@
 # Intuition
 <!-- Describe your first thoughts on how to solve this problem. -->
+
+## Kosaraju Algorithm:
+
+- Sort all the nodes in order of the finishing time. (Topological Sort, The node that are visited at the last, It creates a toposort in that way)
+- Transpose the graph in my next step
+- Do the DFS according to the finishing time.
+
 ## **How Kosaraju fits the problem?**
 
 The key insight is that the graph models dependency between characters:
