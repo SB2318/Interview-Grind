@@ -937,3 +937,68 @@ class Solution {
     }
 }
 ```
+
+## Level Order Traversal
+
+Level Order Traversal (BFS) - Interview Notes
+Idea
+Traverse the tree level by level from top to bottom.
+Use a Queue (FIFO) to process nodes in the order they appear.
+Algorithm
+If the root is null, return.
+Push the root into the queue.
+While the queue is not empty:
+Store the current queue size (levelSize).
+Process exactly levelSize nodes.
+For each node:
+Remove it from the queue.
+Process its value.
+Add its left child (if present).
+Add its right child (if present).
+
+```
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+
+       List<List<Integer>> ans = new ArrayList<>();
+       if(root == null) return ans;
+       Queue<TreeNode> queue = new LinkedList<>();
+
+       queue.offer(root);
+
+       while(!queue.isEmpty()){
+           
+            int size = queue.size();
+            ArrayList<Integer> list = new ArrayList<>();
+            for(int i=0; i<size; i++){
+
+                TreeNode curr = queue.poll();
+
+                if(curr.left != null) queue.offer(curr.left);
+                if(curr.right != null) queue.offer(curr.right);
+
+                list.add(curr.val);
+            }
+
+            ans.add(list);
+       }
+
+       return ans;
+    }
+}
+```
