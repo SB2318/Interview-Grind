@@ -332,5 +332,10 @@ class Solution {
 }
 ```
 
+## Vertical order Traversal
+
+<img width="960" height="667" alt="image" src="https://github.com/user-attachments/assets/79622ea3-6a00-486a-9cd2-45379207cbaa" />
+
+If there are any overlapping node, take smaller value first.
 
 
