@@ -1058,3 +1058,234 @@ class Solution {
     }
 }
 ```
+
+## Boundary Traversal
+
+Boundary Traversal always happen in anti clockwise order
+
+<img width="1122" height="613" alt="image" src="https://github.com/user-attachments/assets/69fff4aa-7d4a-4e73-899a-5da852c31e07" />
+
+# Boundary Traversal (Anti-clockwise) – Interview Notes
+
+## Order of Traversal
+
+Boundary traversal visits nodes in this order:
+
+1. **Root** (only if it is not a leaf)
+2. **Left Boundary** (excluding leaf nodes)
+3. **All Leaf Nodes** (left to right)
+4. **Right Boundary** (excluding leaf nodes, in reverse order)
+
+**Traversal Order:**
+
+```text
+Root
+   ↓
+Left Boundary
+   ↓
+Leaf Nodes
+   ↓
+Right Boundary (Bottom → Top)
+```
+
+---
+
+## Algorithm
+
+### 1. Add Root
+
+```java
+if (!isLeaf(root))
+    ans.add(root.data);
+```
+
+* Don't add the root if it is a leaf.
+* Otherwise, it would be added again during leaf traversal.
+
+---
+
+### 2. Add Left Boundary
+
+Start from `root.left`.
+
+```text
+While current != null
+    if current is not a leaf
+        add current
+    move left if possible
+    otherwise move right
+```
+
+**Key Points**
+
+* Exclude leaf nodes.
+* Prefer the left child.
+* If no left child exists, move to the right child.
+
+---
+
+### 3. Add All Leaf Nodes
+
+Perform a DFS.
+
+```text
+If node is leaf
+    add it
+Else
+    traverse left
+    traverse right
+```
+
+**Key Points**
+
+* Traverse left subtree first.
+* Then traverse right subtree.
+* This naturally gives leaves from left to right.
+
+---
+
+### 4. Add Right Boundary
+
+Start from `root.right`.
+
+```text
+While current != null
+    if current is not a leaf
+        store in temp
+    move right if possible
+    otherwise move left
+
+Add temp in reverse order
+```
+
+**Key Points**
+
+* Exclude leaf nodes.
+* Prefer the right child.
+* Store nodes first, then reverse them before adding to the answer.
+
+---
+
+## Helper Function
+
+```java
+boolean isLeaf(Node node) {
+    return node.left == null && node.right == null;
+}
+```
+
+Used to avoid duplicate leaf nodes.
+
+---
+
+## Why Exclude Leaf Nodes?
+
+Leaves are collected separately during the leaf traversal.
+
+If boundary traversals also include them, they would appear twice.
+
+---
+
+## Time Complexity
+
+* **Time:** `O(N)` — every node is visited at most once.
+* **Space:** `O(H)` — recursion stack for leaf traversal (`H` = tree height). The temporary list for the right boundary stores only boundary nodes, which is `O(H)` in the worst case.
+
+---
+
+## Interview Flow to Remember
+
+```text
+1. Add Root (if not leaf)
+2. Traverse Left Boundary (excluding leaves)
+3. Traverse All Leaves (left → right)
+4. Traverse Right Boundary (excluding leaves, reverse order)
+```
+
+This sequence produces the **anti-clockwise boundary traversal** without duplicates.
+
+
+```
+/* Node Structure
+class Node {
+    int data;
+    Node left, right;
+
+    Node(int val) {
+        data = val;
+        left = right = null;
+    }
+} */
+
+class Solution {
+    public ArrayList<Integer> boundaryTraversal(Node root) {
+        // code here
+        ArrayList<Integer> ans = new ArrayList<>();
+        
+        if(root == null) return ans;
+        
+        if(!isLeaf(root)) ans.add(root.data);
+        
+        addLeftBoundary(root, ans);
+        addLeaves(root, ans);
+        
+        addRightBoundary(root, ans);
+        
+        return ans;
+    }
+    
+    private boolean isLeaf(Node root){
+        return root.left == null && root.right == null;
+    }
+    
+    private void addLeftBoundary(Node root, ArrayList<Integer> ans){
+        
+         if(root == null) return;
+         Node curr = root.left;
+         
+         while(curr != null){
+             
+             if(!isLeaf(curr)){
+                 ans.add(curr.data);
+             }
+             
+             if(curr.left != null) curr = curr.left;
+             else curr = curr.right;
+         }
+    }
+    
+    private void addRightBoundary(Node root, ArrayList<Integer> ans){
+        
+         if(root == null) return;
+         Node curr = root.right;
+         ArrayList<Integer> temp = new ArrayList<>();
+         
+         while(curr != null){
+             
+             if(!isLeaf(curr)){
+                 temp.add(curr.data);
+             }
+             
+             if(curr.right != null) curr = curr.right;
+             else curr = curr.left;
+         }
+         
+         for(int i= temp.size() -1; i>=0; i--){
+             ans.add(temp.get(i));
+         }
+    }
+    
+    private void addLeaves(Node root, ArrayList<Integer> ans){
+        
+         if(root == null) return;
+         if(isLeaf(root)){
+             ans.add(root.data);
+             return;
+         }
+         
+         addLeaves(root.left, ans);
+         addLeaves(root.right, ans);
+    }
+}
+```
+
