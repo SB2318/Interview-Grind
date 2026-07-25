@@ -1002,3 +1002,59 @@ class Solution {
     }
 }
 ```
+
+## Zigzag Traversal
+
+Level Order Traversal, Print row in reverse order alternatively, in one level it will be correct order, another level it will be reverse order.
+
+```
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> ans = new ArrayList<>();
+
+        if(root == null) return ans;
+        Queue<TreeNode> queue = new LinkedList<>();
+
+        boolean flag = true;
+
+        queue.offer(root);
+
+        while(!queue.isEmpty()){
+
+             int size = queue.size();
+
+             Integer[] row = new Integer[size];
+
+             for(int i=0; i<size; i++){
+                 
+                  TreeNode current = queue.poll();
+
+                  if(current.left != null) queue.offer(current.left);
+                  if(current.right != null) queue.offer(current.right);
+
+                  int index = flag? i : size-i-1;
+                  row[index] = current.val;
+             }
+             flag = !flag;
+             ans.add(Arrays.asList(row));
+        }
+
+        return ans;
+    }
+}
+```
