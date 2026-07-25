@@ -57,3 +57,61 @@ class Solution {
 }
 
 ```
+
+<img width="1208" height="533" alt="image" src="https://github.com/user-attachments/assets/e544576e-5fb8-4c16-8416-6285cfb49251" />
+
+Inorder : Left Root Right
+Postorder: Left Right Root
+
+```
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        
+       Map<Integer, Integer> map = new HashMap<>();
+       for(int i=0; i<inorder.length; i++)
+         map.put(inorder[i], i);
+
+       TreeNode root = buildBinaryTree(inorder,0, inorder.length-1,
+        postorder, 0, postorder.length-1, map);
+
+       return root;
+    }
+
+    private TreeNode buildBinaryTree(int[] inorder, int inStart, int inEnd, 
+    int[] postorder, int poststart, int postend, Map<Integer, Integer> map){
+
+        if(inStart > inEnd || poststart > postend) return null;
+
+        // Last value of postorder array is the root of our binary tree
+        
+        TreeNode root = new TreeNode(postorder[postend]);
+        int inRoot = map.get(postorder[postend]);
+        int numsleft = inRoot - inStart;
+
+        root.left = buildBinaryTree(inorder, inStart,inRoot-1, 
+        postorder, poststart, poststart+numsleft-1, map );
+
+        root.right = buildBinaryTree(inorder, inRoot+1, inEnd, 
+        postorder,poststart+numsleft, postend-1, map);
+
+        return root;
+        
+    }
+}
+```
+
