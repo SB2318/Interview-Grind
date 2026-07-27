@@ -602,6 +602,99 @@ Without storing the key in the node, you wouldn't know which map entry to delete
 
 ---
 
+```
+// LRU Cache Implementation using Doubly LinkedList
+class Node{
+    int key, value;
+    Node prev, next;
+
+    public Node(int key, int value){
+        this.key = key;
+        this.value = value;
+    }
+}
+class LRUCache {
+    // head to track the front of the list
+    // tail specifically to remove the least recent node
+    private Node head, tail;
+    private int capacity;
+    HashMap<Integer, Node> map;
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        map = new HashMap<>();
+        head = new Node(-1, -1);
+        tail = new Node(-1, -1);
+
+        head.next = tail;
+        tail.prev = head;
+    }
+    
+    public int get(int key) {
+        
+        if(!map.containsKey(key)){
+            return -1;
+        }
+        Node n = map.get(key);
+        // Remove it from its position and add it to the front as most rcently used
+        remove(n);
+        insert(n);
+        return n.value;
+    }
+    
+    private void remove(Node node){
+
+        // break the link
+        Node prev = node.prev;
+        Node next = node.next;
+        
+        next.prev = prev;
+        prev.next = next;
+    }
+
+    private void insert(Node node){
+      
+         node.prev = head;
+         node.next = head.next;
+         head.next.prev = node;
+         head.next = node;
+
+         map.put(node.key, node);
+    }
+
+    public void put(int key, int value) {
+        
+        // Case 1: Check is key already exist or not, then update the value;
+        if(map.containsKey(key)){
+            Node node = map.get(key);
+            node.value = value;
+            // add it to front as most recently used
+            remove(node);
+            insert(node);
+            return;
+        }
+
+        // Case 2: Capacity exceed
+        if(map.size() >= capacity ){
+            // delete least recent node
+            Node lru = tail.prev;
+            remove(lru);
+            map.remove(lru.key) ; // for this line we are storing key
+        }
+
+        // Add this fresh node
+        Node newNode = new Node(key, value);
+        insert(newNode);
+    }
+}
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+```
 # Easy Interview Explanation (30 seconds)
 
 > "To implement an LRU Cache in O(1), I combine a HashMap and a Doubly Linked List. The HashMap stores `key → node` for constant-time lookup, while the Doubly Linked List maintains the usage order, with the most recently used item at the front and the least recently used at the back. On every `get()` or existing `put()`, I move the node to the front. When the cache is full, I remove the node at the tail and delete its key from the HashMap. This ensures both `get()` and `put()` run in O(1) time."
