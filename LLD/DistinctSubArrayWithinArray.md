@@ -24,6 +24,7 @@ class Solution {
             }
             
             long len = right -left +1;
+            // count += right - left + 1;
             long a = len;
             long b = len+1;
             
