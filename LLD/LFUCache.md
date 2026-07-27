@@ -793,3 +793,114 @@ Within the same frequency, we must evict the **Least Recently Used** item. A DLL
 # Easy Interview Explanation (45 seconds)
 
 > "An LFU Cache combines a `HashMap` with multiple Doubly Linked Lists. The `HashMap` stores `key → node` for constant-time lookup. Each node stores its current frequency, and `freqMap` maps each frequency to a Doubly Linked List that maintains LRU order among nodes with the same frequency. On every `get()` or update, I increase the node's frequency by moving it from one list to the next. When the cache is full, I remove the least recently used node from the list corresponding to `minFreq`, then insert the new node into the frequency-1 list and reset `minFreq` to 1. This guarantees both `get()` and `put()` run in O(1) time.`
+
+```
+class LFUCache {
+    class Node {
+        int key, value, freq;
+        Node prev, next;
+
+        public Node(int key, int value, int freq){
+            this.key = key;
+            this.value = value;
+            this.freq = freq;
+        }
+    }
+
+    class DLL {
+        Node head, tail;
+        int size;
+
+        public DLL(){
+            head = new Node(-1, -1, 1);
+            tail = new Node(-1, -1, 1);
+            head.next = tail;
+            tail.prev = head;
+        }
+
+        public void insert(Node node){
+            node.next = head.next;
+            head.next.prev = node;
+            head.next = node;
+            node.prev = head;
+            size++;
+        }
+        public void remove(Node node){
+            Node next = node.next;
+            Node prev = node.prev;
+            prev.next = next;
+            next.prev = prev;
+            size--;
+        }
+
+        public Node removeLast(){
+
+            if(size == 0) return null;
+            Node lru = tail.prev;
+            remove(lru);
+            return lru;
+        }
+    }
+
+    private int capacity;
+    private int minFreq;
+    HashMap<Integer, Node> keyMap;
+    HashMap<Integer, DLL> freqMap;
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        keyMap = new HashMap<>();
+        freqMap = new HashMap<>(); 
+    }
+    
+    public int get(int key) {
+        
+        if(!keyMap.containsKey(key)) return -1;
+        Node node = keyMap.get(key);
+        updateFreq(node);
+        return node.value;
+    }
+    
+    private void updateFreq(Node node){
+        int oldFreq = node.freq;
+        DLL oldList = freqMap.get(oldFreq);
+        oldList.remove(node);
+
+        if(oldFreq == minFreq && oldList.size == 0){
+            minFreq++;
+        }
+        node.freq++;
+        DLL newList = freqMap.getOrDefault(node.freq, new DLL());
+        newList.insert(node);
+        freqMap.put(node.freq, newList);
+    }
+    public void put(int key, int value) {
+        
+        if(keyMap.containsKey(key)){
+            Node node = keyMap.get(key);
+            node.value = value;
+            updateFreq(node);
+            return;
+        }
+
+        if(keyMap.size() == capacity){
+            DLL minList = freqMap.get(minFreq);
+            Node lru = minList.removeLast();
+            if(lru != null) keyMap.remove(lru.key);
+        }
+
+        Node newNode = new Node(key, value, 1);
+        minFreq = 1;
+        DLL list = freqMap.getOrDefault(1, new DLL());
+        list.insert(newNode);
+        freqMap.put(1, list);
+        keyMap.put(key, newNode);
+    }
+}
+
+/**
+ * Your LFUCache object will be instantiated and called as such:
+ * LFUCache obj = new LFUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+```
