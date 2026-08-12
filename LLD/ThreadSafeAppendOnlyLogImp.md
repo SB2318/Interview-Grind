@@ -1,16 +1,17 @@
 
+These Log Class maintains Three pieces of informations.
+
+- logBuffer -> Your actual log file
+- indexOffsets -> You can say corresponding IDs of each information.
+- headOfset -> Id of your topmost information
+- Informations stored in the order : [length]:[record]
+
+Here, One catch, generally informations or records inside any log file are immutable in nature, You cannot modify or delete. But intentionally I provided a delete implementation here.
+
 ```
-/******************************************************************************
 
-Welcome to GDB Online.
-GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
-C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
-Code, Compile, Run and Debug online from anywhere in world.
-
-*******************************************************************************/
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 public class Main
 {
 	public static void main(String[] args) {
@@ -18,90 +19,102 @@ public class Main
 		
 		AppendOnlyLog appendOnlyLog = new AppendOnlyLog();
 		
-		appendOnlyLog.append("Disaster is on the way");
-		appendOnlyLog.append("Susmita");
-		appendOnlyLog.append("Offline");
-		appendOnlyLog.append("Time out");
-		appendOnlyLog.append("Teacher is one of the instrument of god");
-		appendOnlyLog.append("All teachers");
-		appendOnlyLog.append("Amrit");
-		appendOnlyLog.append("Hitesh");
-		appendOnlyLog.append("Team");
-		appendOnlyLog.append("Disaster is on the way");
-		appendOnlyLog.append("Beautiful nature");
-		appendOnlyLog.append("Jai Shri Krishna");
+		appendOnlyLog.append("Test1");
 		
-		System.out.println(appendOnlyLog.read(11));
-		
-	
+		System.out.println(appendOnlyLog.read(0));
 	}
 	
 	static class AppendOnlyLog {
 	    
-	    private final StringBuilder logBuffer = new StringBuilder();
-	    private final List<Integer> indexes = new ArrayList<>();
+	    private StringBuffer logBuffer = new StringBuffer();
+	    private List<Integer> indexofsets = new ArrayList<>();
 	    
-	    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+	    private long headofset = 0;
 	    
+	    private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+	    
+	    // Append a new event
 	    public int append(String record){
+	        
+	         rwLock.writeLock().lock();
+	         
+	         try{
+	             
+	             int ofset = indexofsets.size();
+	             int startPos = logBuffer.length();
+	             
+	             indexofsets.add(startPos);
+	             logBuffer.append(record.length()).append(":").append(record);
+	             
+	             return ofset;
+	             
+	         }finally{
+	             rwLock.writeLock().unlock();
+	         }
+	    }
+	    
+	    // Read  event
+	    public String read(long ofset){
+	        rwLock.readLock().lock();
+	        
+	        try{
+	            
+	            if(ofset < headofset) return "";
+	            
+	            int relativeIndex = (int) (ofset - headofset);
+	            
+	            if(relativeIndex >= indexofsets.size()) return "";
+	            
+	            int startPos = indexofsets.get(relativeIndex);
+	            
+	            int delimeterPos = logBuffer.indexOf(":", startPos);
+	            
+	            int length = Integer.parseInt(logBuffer.substring(startPos, delimeterPos));
+	            
+	            int payloadStart = delimeterPos + 1;
+	            
+	            return logBuffer.substring(payloadStart, payloadStart+length);
+	            
+	        }finally{
+	            rwLock.readLock().unlock();
+	        }
+	    }
+	    
+	    // Delete event
+	    public int deleteUpTo(long targetofset){
 	        
 	        rwLock.writeLock().lock();
 	        
 	        try{
-	            
-	            int offset = indexes.size();
-	            int startPos = logBuffer.length();
-	            
-	            indexes.add(startPos);
-	            logBuffer.append(record.length()).append(":").append(record);
-	            
-	            return offset;
-	        }finally{
+	           long maxAvailable = headofset + indexofsets.size();
+	           long effectiveTarget = Math.min(targetofset, maxAvailable);
+	           
+	           int recordsToDelete = (int) (effectiveTarget - headofset);
+	           
+	           if(recordsToDelete <= 0) return 0;
+	           
+	           int deleteCharAtEnd = recordsToDelete < indexofsets.size() ? indexofsets.get(recordsToDelete) : logBuffer.length();
+	           
+	           indexofsets.subList(0, recordsToDelete).clear();
+	           logBuffer.delete(0, deleteCharAtEnd); // end index exclusive
+	           
+	           for(int i=0; i<indexofsets.size(); i++){
+	               indexofsets.set(i, indexofsets.get(i)-deleteCharAtEnd);
+	           }
+	           
+	           headofset += recordsToDelete;
+	           
+	           return recordsToDelete;
+	           
+	        }
+	        finally{
 	            rwLock.writeLock().unlock();
 	        }
 	        
 	    }
-	    
-	    public String read(int offset){
-	        
-	        rwLock.readLock().lock();
-	        
-	        try{
-	            
-	            if(offset < 0 || offset >= indexes.size()){
-	                return "Offset out of range";
-	            }
-	            
-	            int position = indexes.get(offset);
-	            int delimeterPos = logBuffer.indexOf(":", position);
-	            
-	            int length = Integer.parseInt(logBuffer.substring(position, delimeterPos));
-	            
-	            int payloadStart = delimeterPos + 1;
-	            
-	            return logBuffer.substring(payloadStart, payloadStart + length);
-	            
-	        }finally{
-	            
-	            rwLock.readLock().unlock();
-	        }
-	    }
-	    
-	    public int size(){
-	        
-	        rwLock.readLock().lock();
-	        
-	        try{
-	          
-	           return indexes.size();
-	           
-	        }finally{
-	            rwLock.readLock().unlock();
-	        }
-	    }
-	    
 	}
 }
+
 
 
 ```
