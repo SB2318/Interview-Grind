@@ -695,6 +695,36 @@ class LRUCache {
  * obj.put(key,value);
  */
 ```
+
+## JavaScript 
+```
+
+class LRUCache {
+  constructor(capacity){
+    this.capacity = capacity;
+    this.cache = new Map();
+  }
+  get(key){
+    if(!this.cache.has(key)) return -1;
+    const value = this.cache.get(key);
+    this.cache.set(key, value);
+    return value;
+  }
+
+  put(key, value){
+    if(this.cache.has(key)){
+      this.cache.delete(key);
+    }
+    this.cache.set(key, value);
+    if(this.cache.size >= capacity){
+      //JavaScript maintains maps in order
+      const oldest = this.cache.keys().next();
+      this.cache.delete(oldest);
+    }
+  }
+}
+
+```
 # Easy Interview Explanation (30 seconds)
 
 > "To implement an LRU Cache in O(1), I combine a HashMap and a Doubly Linked List. The HashMap stores `key → node` for constant-time lookup, while the Doubly Linked List maintains the usage order, with the most recently used item at the front and the least recently used at the back. On every `get()` or existing `put()`, I move the node to the front. When the cache is full, I remove the node at the tail and delete its key from the HashMap. This ensures both `get()` and `put()` run in O(1) time."
