@@ -707,7 +707,9 @@ class LRUCache {
   get(key){
     if(!this.cache.has(key)) return -1;
     const value = this.cache.get(key);
+    this.cache.delete(key);
     this.cache.set(key, value);
+    
     return value;
   }
 
@@ -716,9 +718,9 @@ class LRUCache {
       this.cache.delete(key);
     }
     this.cache.set(key, value);
-    if(this.cache.size >= capacity){
+    if(this.cache.size > this.capacity){
       //JavaScript maintains maps in order
-      const oldest = this.cache.keys().next();
+      const oldest = this.cache.keys().next().value;
       this.cache.delete(oldest);
     }
   }
